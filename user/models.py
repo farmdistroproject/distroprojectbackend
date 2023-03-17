@@ -8,10 +8,11 @@ from config.database import Base
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255))
+    email = Column(String(255),unique=True)
     username = Column(String(255))
     password = Column(String)
     email_verified=Column(Boolean, default=False)
+    google_id = Column(String)
     profile = relationship('UserProfile',uselist=False, back_populates='user',cascade="all, delete-orphan")
 
 

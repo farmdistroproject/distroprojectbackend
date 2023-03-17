@@ -1,7 +1,10 @@
-from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File
+from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File,Body
 from datetime import timedelta,timezone,datetime
 from jose import JWTError,jwt
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from passlib.context import CryptContext
+from .crud import UserCrud
 from . import  models
 from sqlalchemy.orm import Session
 from PIL import Image
@@ -117,3 +120,19 @@ def verification_email(token, db:Session,model):
 
 
 #tf
+
+def get_google_auth(token:str=Body(), db:Session=Depends(get_db)):
+    try:
+        token= id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
+        user=get_user_by_email(db, email=token['email'])
+        if user:
+            return user
+        else:
+            user=models.User(email=token['email'], email_verified=True,google_id=token['sub'], password=hash_password(token['sub']))
+            user_profile = models.UserProfile( first_name=token['family_name'], last_name=token['given_name'],)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            return user
+    except:
+        raise HTTPException(status_code=400, detail='invalid token or token has expired')

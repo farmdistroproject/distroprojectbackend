@@ -2,7 +2,7 @@ from fastapi import APIRouter,status,HTTPException,Depends,Response,Cookie,Heade
 from sqlalchemy.orm import Session
 from config.database import get_db
 from . import models
-from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user
+from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user,get_google_auth
 from . import  schemas
 from fastapi_mail import FastMail,MessageSchema
 from config.email import env_config
@@ -173,3 +173,18 @@ async def get_user_profile(userr:dict = Depends(get_current_user),db : Session =
 
     }
     return response
+
+
+
+
+
+@router.post("/google", tags=['auth'] summary='google authentication')
+def google(response:Response,user:dict=Depends(get_google_auth), Authorize:AuthJWT=Depends()):
+    '''
+    expects a token
+    '''
+    access_token=Authorize.create_access_token(subject=user.email, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
+    refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
+    response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
+    response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
+    return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
