@@ -1,9 +1,8 @@
 from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from datetime import timedelta,timezone,datetime
 from jose import JWTError,jwt
 from passlib.context import CryptContext
-import models
+from . import  models
 from sqlalchemy.orm import Session
 from PIL import Image
 import secrets
@@ -54,7 +53,7 @@ def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), ac
     try:
         Authorize.jwt_required()
         user_email=Authorize.get_jwt_subject()
-        user=get_user_by_email(user_email,db)
+        user=get_user_by_email(user_email,db,model=models.User)
         return user
     except:
         raise exception
@@ -118,16 +117,3 @@ def verification_email(token, db:Session,model):
 
 
 #tf
-env_config = ConnectionConfig(
-    MAIL_USERNAME = os.getenv("SEND_EMAIL"),
-    MAIL_PASSWORD = os.getenv("SEND_EMAIL_PASSWORD"),
-    MAIL_FROM = os.getenv("SEND_EMAIL"),
-    MAIL_PORT = 587,
-    MAIL_SERVER='smtp.gmail.com',
-    MAIL_FROM_NAME="Melidata",
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
-    USE_CREDENTIALS = True,
-    VALIDATE_CERTS = True,
-    TEMPLATE_FOLDER='templates'
-)
