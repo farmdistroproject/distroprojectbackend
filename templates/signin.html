@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="google-signin-client_id" content="679713154410-nrd8ubuhpun8bu1mm312qv638us6bgks.apps.googleusercontent.com">
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+	<div class="g-signin2" data-onsuccess="onSignIn">google</div>
+	<button id="signin-button">Sign In with Google</button>
+	<script>
+		function onSignIn(googleUser) {
+			var id_token = googleUser.getAuthResponse().id_token;
+			$('#signin-button').click(function() {
+				$.ajax({
+					type: "POST",
+					url: `http://127.0.0.1:8000/api/v1/auth/google/?token={id_token}`,
+					
+					success: function(data) {
+						console.log(data);
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						console.log(textStatus, errorThrown);
+					}
+				});
+			});
+		}
+	</script>
+</body>
+</html>
