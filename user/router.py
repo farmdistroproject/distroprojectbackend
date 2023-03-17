@@ -1,14 +1,16 @@
 from fastapi import APIRouter,status,HTTPException,Depends,Response,Cookie,Header,BackgroundTasks
 from sqlalchemy.orm import Session
 from config.database import get_db
-import models
-from helpers import get_user_by_email,verify_password
-import schemas
+
+from . import models
+from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user
+from . import  schemas
 from fastapi_mail import FastMail,MessageSchema
-from helpers import verification_code,verification_email,env_config
+from config.email import env_config
 
 from fastapi_jwt_auth import AuthJWT
-from crud import UserCrud
+from .crud import UserCrud
+
 from datetime import timedelta
 
 
@@ -52,8 +54,10 @@ async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depen
 def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=Depends(get_db)):
     try:
         User=get_user_by_email(email=email,db=db,model=models.User)
-        # if User.email_verifies:
-        #     raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="your email is verified")
+
+        if User.email_verified:
+            raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="your email is verified")
+
         token=verification_code(User.email) 
         message=MessageSchema(
             subject='Account Verification Email',
@@ -131,4 +135,47 @@ async def verify_email_code(key:str, db:Session=Depends(get_db)):
 async def reset_password(request:schemas.resetPassword):
     pass
 
+
+
+@router.post("/set-profile",status_code=status.HTTP_201_CREATED)
+async def create_user_profile_route(request:schemas.UserProfile,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == userr.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
+    response = UserCrud.create_user_profile(user=user,db=db,request=request)
+    return response
+
+
+@router.patch("/update-profile/",status_code=status.HTTP_200_OK)
+async def update_user_profile_route(request:schemas.UserProfileUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == userr.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
+    response = UserCrud.update_user_profile(user=user,db=db,request=request)
+    return response
+
+
+# @router.patch("/update",status_code=status.HTTP_200_OK)
+# async def update_user_profile_route(request:schemas.UserUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
+#     user = db.query(models.User).filter(models.User.id == userr.id).first()
+#     if not user:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
+#     response = UserCrud.update_user(id=user.id,db=db,request=request)
+#     return response
+
+
+@router.get("/get-profile",status_code=status.HTTP_200_OK)
+async def get_user_profile(userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == userr.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
+    response = {
+        "user":{
+        "username":user.username,
+        "email":user.email
+        },
+        "profile":user.profile
+
+    }
+    return response
 

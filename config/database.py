@@ -7,7 +7,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db" #"postgresql://user:password@pos
 
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+    SQLALCHEMY_DATABASE_URL,echo=True,connect_args={"check_same_thread":False}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
