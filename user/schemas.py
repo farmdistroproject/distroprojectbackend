@@ -9,26 +9,32 @@ class User(BaseModel):
     email: EmailStr
     password1: str
     password2: str
-
-
-class UserUpdate(BaseModel):
-    email:Union[EmailStr, None]
-    username:Union[str, None]
-
-
-class UserProfile(BaseModel):
     first_name: str
     last_name:str
     phone_number: int
     dob: date
 
 
-class UserProfileUpdate(BaseModel):
+class UserUpdate(BaseModel):
+    email:Union[EmailStr, None]
+    username:Union[str, None]
     first_name: Union[str, None]
     last_name:Union[str, None]
     phone_number: Union[str, None]
     dob: Optional[date] = None
 
+
+
+class ShowUser(BaseModel):
+    username: str
+    email: EmailStr
+    first_name: str
+    last_name:str
+    phone_number: str
+    dob: date
+
+    class Config():
+        orm_mode = True
 
 class Login(BaseModel):
     username:EmailStr

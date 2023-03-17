@@ -127,61 +127,40 @@ async def verify_email_code(key:str, db:Session=Depends(get_db)):
 
 #reset password
 @router.post("/reset-password")
-# schemas.
 async def reset_password(request:schemas.resetPassword):
     pass
 
 
-@router.post("/set-profile",status_code=status.HTTP_201_CREATED)
-async def create_user_profile_route(request:schemas.UserProfile,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
+
+
+
+
+
+@router.patch("/update",status_code=status.HTTP_200_OK)
+async def update_user_profile_route(request:schemas.UserUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == userr.id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-    response = UserCrud.create_user_profile(user=user,db=db,request=request)
+    response = UserCrud.update_user(id=user.id,db=db,request=request)
     return response
 
 
-@router.patch("/update-profile/",status_code=status.HTTP_200_OK)
-async def update_user_profile_route(request:schemas.UserProfileUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == userr.id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-    response = UserCrud.update_user_profile(user=user,db=db,request=request)
-    return response
-
-
-# @router.patch("/update",status_code=status.HTTP_200_OK)
-# async def update_user_profile_route(request:schemas.UserUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
-#     user = db.query(models.User).filter(models.User.id == userr.id).first()
-#     if not user:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-#     response = UserCrud.update_user(id=user.id,db=db,request=request)
-#     return response
-
-
-@router.get("/get-profile",status_code=status.HTTP_200_OK)
+@router.get("/get-profile",status_code=status.HTTP_200_OK,tags=['profile'],response_model=schemas.ShowUser)
 async def get_user_profile(userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == userr.id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-    response = {
-        "user":{
-        "username":user.username,
-        "email":user.email
-        },
-        "profile":user.profile
 
-    }
-    return response
+    return user
 
 
 
 
 
-@router.post("/google", tags=['auth'] summary='google authentication')
+@router.post("/google/",summary='google authentication')
 def google(response:Response,user:dict=Depends(get_google_auth), Authorize:AuthJWT=Depends()):
     '''
-    expects a token
+    expects a token from auth process
     '''
     access_token=Authorize.create_access_token(subject=user.email, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
     refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))

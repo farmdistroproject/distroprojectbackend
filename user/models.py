@@ -11,22 +11,16 @@ class User(Base):
     email = Column(String(255),unique=True)
     username = Column(String(255))
     password = Column(String)
-    email_verified=Column(Boolean, default=False)
-    google_id = Column(String)
-    profile = relationship('UserProfile',uselist=False, back_populates='user',cascade="all, delete-orphan")
 
-
-
-class UserProfile(Base):
-    __tablename__ = "user_profile"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('user.id',ondelete='CASCADE'))
     first_name = Column(String(255))
     last_name = Column(String(255))
     phone_number= Column(String(255))
     dob = Column(Date())
 
-    user = relationship('User', back_populates='profile')
+    email_verified=Column(Boolean, default=False)
+    google_id = Column(String)
+
+
+
 
 
