@@ -1,8 +1,10 @@
+
 from . import schemas
 from fastapi import HTTPException,status
 from .helpers import hash_password
 
 from . import models
+
 from sqlalchemy.orm import Session
 
 
@@ -16,20 +18,25 @@ class UserCrud():
         if len(request.password1) < 6 :
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="make password 6 characters")
         cleaned_password = hash_password(request.password1)
+
         new_user = models.User(email=request.email,username=request.username,password=cleaned_password)
+
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
         return new_user
 
     @staticmethod
+
     def update_user(id:int,db:Session,request:schemas.UserUpdate):
         user = db.query(models.User).filter(models.User.id == id)
+
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
         user.update(request.dict(exclude_unset=True),synchronize_session=False)
         db.commit()
         return "user updated"
+
     
     @staticmethod
     def create_user_profile(user:dict(),db:Session,request:schemas.UserProfile):
@@ -58,3 +65,4 @@ class UserCrud():
         return "user updated"  
 
     
+

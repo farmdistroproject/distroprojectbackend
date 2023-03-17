@@ -1,8 +1,10 @@
 from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File
+
 from datetime import timedelta,timezone,datetime
 from jose import JWTError,jwt
 from passlib.context import CryptContext
 from . import  models
+
 from sqlalchemy.orm import Session
 from PIL import Image
 import secrets
@@ -53,7 +55,9 @@ def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), ac
     try:
         Authorize.jwt_required()
         user_email=Authorize.get_jwt_subject()
+
         user=get_user_by_email(user_email,db,model=models.User)
+
         return user
     except:
         raise exception
@@ -117,3 +121,5 @@ def verification_email(token, db:Session,model):
 
 
 #tf
+
+
