@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 
 class User(Base):
+
     __tablename__ = "user"
     pkid = Column(Integer,primary_key=True)
     id = Column(UUID(as_uuid=True), default=uuid.uuid4,unique=True) 
@@ -22,6 +23,7 @@ class User(Base):
 
     email_verified=Column(Boolean, default=False)
     google_id = Column(String)
+
 
 
 
