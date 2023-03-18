@@ -2,11 +2,14 @@ from sqlalchemy import Column, Integer, String,Boolean,DateTime,Date
 from config.database import Base
 import uuid
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID
+
+
 
 
 class User(Base):
     __tablename__ = "user"
-    id = Column(String(36), primary_key=True,default=str(uuid.uuid4())) #string to make it unique
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True) #string to make it unique
     email = Column(String(255),unique=True)
     password = Column(String)
 
