@@ -10,7 +10,7 @@ class User(BaseModel):
     password2: str
     first_name: str
     last_name:str
-    phone_number: int
+    phone_number: str
     date_of_birth: date
 
 
