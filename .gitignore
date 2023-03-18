@@ -169,4 +169,4 @@ poetry.toml
 .ruff_cache/
 
 templates/signin.html
-.blob.db
+blob.db
