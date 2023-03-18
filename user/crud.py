@@ -20,9 +20,7 @@ class UserCrud():
 
         cleaned_password = helpers.hash_password(request.password1)
         new_user = models.User(email=request.email,password=cleaned_password,first_name=request.first_name,last_name=request.last_name,date_of_birth=request.date_of_birth,phone_number = request.phone_number)
-        cleaned_password = hash_password(request.password1)
 
-        new_user = models.User(email=request.email,username=request.username,password=cleaned_password)
 
 
         db.add(new_user)
@@ -43,30 +41,6 @@ class UserCrud():
 
     
    
-    @staticmethod
-    def create_user_profile(user:dict(),db:Session,request:schemas.UserProfile):
-        # user = db.query(models.User).filter(models.User.id == id)
-        userp = db.query(models.UserProfile).filter(models.UserProfile.user_id == user.id).first()
-        if userp:
-            raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail=f"profile exists {userp}, update")
-        user_profile = models.UserProfile(first_name=request.first_name,last_name=request.last_name,dob=request.dob,phone_number = request.phone_number,user_id = user.id)
-        db.add(user_profile)
-        db.commit()
-        db.refresh(user_profile)
-        return user_profile
 
-
-    @staticmethod
-    def update_user_profile(user:dict(),db:Session,request:schemas.UserProfileUpdate):
-        userp = db.query(models.UserProfile).filter(models.UserProfile.user_id == user.id)
-        if not userp:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
-        try:
-            userp.update(request.dict(exclude_unset=True),synchronize_session=False)
-            db.commit()
-        except Exception as e:
-            return e
-        
-        return "user updated"  
 
     
