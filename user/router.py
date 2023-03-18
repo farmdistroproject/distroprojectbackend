@@ -2,7 +2,7 @@ from fastapi import APIRouter,status,HTTPException,Depends,Response,Cookie,Heade
 from sqlalchemy.orm import Session
 from config.database import get_db
 from . import models
-from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user,get_google_auth
+from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user,get_google_auth,check_birth_age
 from . import  schemas
 from fastapi_mail import FastMail,MessageSchema
 from config.email import env_config
@@ -29,12 +29,15 @@ async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depen
     verify = get_user_by_email(email=request.email,db=db,model=models.User)
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
+    check_year = check_birth_age(request.date_of_birth)
+    if not check_year:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="user's age less than 18")
     new_user = UserCrud.create_user(request,db)
     token = verification_code(new_user.email)
     message = MessageSchema(
         subject="Account Verification Email",
         recipients=[new_user.email], 
-        template_body={'token':token, 'user':f'{new_user.username}',},
+        template_body={'token':token, 'user':f'{new_user.email}',},
         subtype='html',
         )
     fm = FastMail(env_config)
@@ -58,7 +61,7 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
         message=MessageSchema(
             subject='Account Verification Email',
             recipients=[User.email],
-            template_body={'token':token, 'user':f'{User.username}'},
+            template_body={'token':token, 'user':f'{User.email}'},
             subtype='html'
         )
         f=FastMail(env_config)
@@ -78,7 +81,7 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
 @router.post("/login",)
 async def login_in(response:Response,request:schemas.Login,db:Session = Depends(get_db),Authorize:AuthJWT=Depends()):
     """logs user in and return access and refresh tokens"""
-    user = get_user_by_email(email=request.username,db=db,model=models.User)
+    user = get_user_by_email(email=request.email,db=db,model=models.User)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
@@ -88,7 +91,7 @@ async def login_in(response:Response,request:schemas.Login,db:Session = Depends(
     refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
     response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
     response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
-    return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
+    return {'access_token':access_token, 'refresh_token':refresh_token}
     
 
 
@@ -166,4 +169,4 @@ def google(response:Response,user:dict=Depends(get_google_auth), Authorize:AuthJ
     refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
     response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
     response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
-    return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
+    return {'access_token':access_token, 'refresh_token':refresh_token}

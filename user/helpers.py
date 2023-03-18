@@ -7,10 +7,10 @@ from passlib.context import CryptContext
 from .crud import UserCrud
 from . import  models
 from sqlalchemy.orm import Session
-from PIL import Image
 import secrets
 from fastapi_jwt_auth import AuthJWT
 import uuid
+import datetime
 from config.database import get_db
 
 import os
@@ -70,27 +70,13 @@ def generate_uuid(name):
 
 
 
-async def get_image_url(file: UploadFile = File(...),user:dict = Depends()):
-    FILEPATH = "./media/profile_image/"
-    filename = file.filename
-    ext = filename.split(".")[1]
-    if ext not in ['png', 'jpg','webp']:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Image type not allowed")
-    token_name= user.username+"_"+"profile_image"+"_"+secrets.token_urlsafe(4)+"."+ext
-    generated_name=FILEPATH + token_name
-    file_content= await file.read()
+def check_birth_age(birthdate):
+    today = datetime.date.today()
+    #checks if the person has already celebrated their birthday this year or not, and subtracts 1 from the age if not.
+    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    return age >= 18 
 
-    with open(generated_name, 'wb') as file:
-        file.write(file_content)
 
-    # PILLOW IMAGE RESIZE
-    img = Image.open(generated_name)
-    resized_image = img.resize(size=(500,500))
-    resized_image.save(generated_name)
-    
-    file.close()
-    file_url = generated_name[1:]
-    return file_url
 
 
 

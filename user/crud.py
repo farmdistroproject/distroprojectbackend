@@ -16,7 +16,7 @@ class UserCrud():
         if len(request.password1) < 6 :
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="make password 6 characters")
         cleaned_password = helpers.hash_password(request.password1)
-        new_user = models.User(email=request.email,username=request.username,password=cleaned_password,first_name=request.first_name,last_name=request.last_name,dob=request.dob,phone_number = request.phone_number)
+        new_user = models.User(email=request.email,password=cleaned_password,first_name=request.first_name,last_name=request.last_name,date_of_birth=request.date_of_birth,phone_number = request.phone_number)
         db.add(new_user)
         db.commit()
         db.refresh(new_user)

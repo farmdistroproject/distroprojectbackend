@@ -1,21 +1,20 @@
-from sqlalchemy import Column, Integer, String,Boolean,ForeignKey,DateTime,Date
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import Mapped
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String,Boolean,DateTime,Date
 from config.database import Base
+import uuid
+from datetime import datetime
 
 
 class User(Base):
     __tablename__ = "user"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String(36), primary_key=True, index=True,default=str(uuid.uuid4())) #string to make it unique
     email = Column(String(255),unique=True)
-    username = Column(String(255))
     password = Column(String)
 
     first_name = Column(String(255))
     last_name = Column(String(255))
-    phone_number= Column(String(255))
-    dob = Column(Date())
+    phone_number= Column(Integer(15))
+    date_of_birth = Column(Date())
+    date_registered = Column(DateTime, default=datetime.utcnow)
 
     email_verified=Column(Boolean, default=False)
     google_id = Column(String)
