@@ -12,7 +12,7 @@ class User(Base):
 
     first_name = Column(String(255))
     last_name = Column(String(255))
-    phone_number= Column(Integer(15))
+    phone_number= Column(Integer)
     date_of_birth = Column(Date())
     date_registered = Column(DateTime, default=datetime.utcnow)
 

@@ -1,5 +1,5 @@
 from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File,Body
-from datetime import timedelta,timezone,datetime
+from datetime import timedelta,timezone,datetime,date
 from jose import JWTError,jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 import secrets
 from fastapi_jwt_auth import AuthJWT
 import uuid
-import datetime
 from config.database import get_db
 
 import os
@@ -71,8 +70,8 @@ def generate_uuid(name):
 
 
 def check_birth_age(birthdate):
-    today = datetime.date.today()
-    #checks if the person has already celebrated their birthday this year or not, and subtracts 1 from the age if not.
+    today = date.today()
+    #checks if the user has already celebrated their birthday this year or not
     age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
     return age >= 18 
 
