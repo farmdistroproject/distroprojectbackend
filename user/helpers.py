@@ -1,11 +1,13 @@
 from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File,Body
 from datetime import timedelta,timezone,datetime,date
+
 from jose import JWTError,jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from passlib.context import CryptContext
 from .crud import UserCrud
 from . import  models
+
 from sqlalchemy.orm import Session
 import secrets
 from fastapi_jwt_auth import AuthJWT
@@ -55,7 +57,9 @@ def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), ac
     try:
         Authorize.jwt_required()
         user_email=Authorize.get_jwt_subject()
+
         user=get_user_by_email(user_email,db,model=models.User)
+
         return user
     except:
         raise exception
@@ -104,8 +108,6 @@ def verification_email(token, db:Session,model):
   
 
 
-#tf
-
 def get_google_auth(token:str, db:Session=Depends(get_db)):
     try:
         
@@ -121,3 +123,4 @@ def get_google_auth(token:str, db:Session=Depends(get_db)):
             return user
     except Exception as e:
         raise HTTPException(status_code=400, detail=f'{e}')
+

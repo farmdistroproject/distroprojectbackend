@@ -8,6 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 
 class User(Base):
+
     __tablename__ = "user"
     id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True) #string to make it unique
     email = Column(String(255),unique=True)
@@ -21,6 +22,7 @@ class User(Base):
 
     email_verified=Column(Boolean, default=False)
     google_id = Column(String)
+
 
 
 
