@@ -61,6 +61,7 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+.blob.db
 
 # Flask stuff:
 instance/
@@ -167,3 +168,5 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+templates/signin.html
+blob.db

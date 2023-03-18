@@ -1,7 +1,7 @@
 
 from . import schemas
 from fastapi import HTTPException,status
-from .helpers import hash_password
+from . import helpers
 
 from . import models
 
@@ -17,9 +17,13 @@ class UserCrud():
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="passwords do not match")
         if len(request.password1) < 6 :
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="make password 6 characters")
+
+        cleaned_password = helpers.hash_password(request.password1)
+        new_user = models.User(email=request.email,password=cleaned_password,first_name=request.first_name,last_name=request.last_name,date_of_birth=request.date_of_birth,phone_number = request.phone_number)
         cleaned_password = hash_password(request.password1)
 
         new_user = models.User(email=request.email,username=request.username,password=cleaned_password)
+
 
         db.add(new_user)
         db.commit()
@@ -38,6 +42,7 @@ class UserCrud():
         return "user updated"
 
     
+   
     @staticmethod
     def create_user_profile(user:dict(),db:Session,request:schemas.UserProfile):
         # user = db.query(models.User).filter(models.User.id == id)
@@ -65,4 +70,3 @@ class UserCrud():
         return "user updated"  
 
     
-

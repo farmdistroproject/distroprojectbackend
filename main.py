@@ -3,9 +3,13 @@ from fastapi import FastAPI
 from user import router as user_router
 
 
-app = FastAPI()
+app = FastAPI(description="Ntoju backend",title="Ntoju dev")
 app.include_router(user_router.router)
+
+
+
+
 
 @app.get("/")
 async def root():
-    return{"introduction": "ntoju backend server"}
+    return "you dey homepage"

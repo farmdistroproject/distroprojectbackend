@@ -1,33 +1,30 @@
-from sqlalchemy import Column, Integer, String,Boolean,ForeignKey,DateTime,Date
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import Mapped
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String,Boolean,DateTime,Date
 from config.database import Base
+import uuid
+from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID
+
+
 
 
 class User(Base):
 
     __tablename__ = "user"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255))
-    username = Column(String(255))
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True) #string to make it unique
+    email = Column(String(255),unique=True)
     password = Column(String)
-    email_verified=Column(Boolean, default=False)
-    profile = relationship('UserProfile',uselist=False, back_populates='user',cascade="all, delete-orphan")
 
-
-
-class UserProfile(Base):
-    __tablename__ = "user_profile"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('user.id',ondelete='CASCADE'))
     first_name = Column(String(255))
     last_name = Column(String(255))
-    phone_number= Column(String(255))
-    dob = Column(Date())
+    phone_number= Column(Integer)
+    date_of_birth = Column(Date())
+    date_registered = Column(DateTime, default=datetime.utcnow)
 
-    user = relationship('User', back_populates='profile')
+    email_verified=Column(Boolean, default=False)
+    google_id = Column(String)
+
+
+
 
 
 

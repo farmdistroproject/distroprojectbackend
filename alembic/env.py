@@ -5,12 +5,26 @@ from sqlalchemy import pool
 
 from config.database import Base
 from user.models import *
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+
+# we passvariables for sqlalchemy.url to alembic.ini
+# fron the host env
+section = config.config_ini_section
+config.set_section_option(section, "DB_USER", os.getenv("DB_USER"))
+config.set_section_option(section, "DB_PASS", os.getenv("DB_PASS"))
+config.set_section_option(section, "DB_NAME", os.getenv("DB_NAME"))
+config.set_section_option(section, "DB_HOST", os.getenv("DB_HOST"))
+config.set_section_option(section, "DB_PORT", os.getenv("DB_PORT"))
+
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

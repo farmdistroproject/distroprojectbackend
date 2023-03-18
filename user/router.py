@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from config.database import get_db
 
 from . import models
-from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user
+from .helpers import get_user_by_email,verify_password,verification_code,verification_email,get_current_user,get_google_auth,check_birth_age
 from . import  schemas
 from fastapi_mail import FastMail,MessageSchema
 from config.email import env_config
@@ -31,12 +31,15 @@ async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depen
     verify = get_user_by_email(email=request.email,db=db,model=models.User)
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
+    check_year = check_birth_age(request.date_of_birth)
+    if not check_year:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="user's age less than 18")
     new_user = UserCrud.create_user(request,db)
     token = verification_code(new_user.email)
     message = MessageSchema(
         subject="Account Verification Email",
         recipients=[new_user.email], 
-        template_body={'token':token, 'user':f'{new_user.username}',},
+        template_body={'token':token, 'user':f'{new_user.email}',},
         subtype='html',
         )
     fm = FastMail(env_config)
@@ -62,7 +65,7 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
         message=MessageSchema(
             subject='Account Verification Email',
             recipients=[User.email],
-            template_body={'token':token, 'user':f'{User.username}'},
+            template_body={'token':token, 'user':f'{User.email}'},
             subtype='html'
         )
         f=FastMail(env_config)
@@ -82,7 +85,7 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
 @router.post("/login",)
 async def login_in(response:Response,request:schemas.Login,db:Session = Depends(get_db),Authorize:AuthJWT=Depends()):
     """logs user in and return access and refresh tokens"""
-    user = get_user_by_email(email=request.username,db=db,model=models.User)
+    user = get_user_by_email(email=request.email,db=db,model=models.User)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
@@ -92,7 +95,7 @@ async def login_in(response:Response,request:schemas.Login,db:Session = Depends(
     refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
     response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
     response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
-    return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
+    return {'access_token':access_token, 'refresh_token':refresh_token}
     
 
 
@@ -131,51 +134,43 @@ async def verify_email_code(key:str, db:Session=Depends(get_db)):
 
 #reset password
 @router.post("/reset-password")
-# schemas.
 async def reset_password(request:schemas.resetPassword):
     pass
 
 
 
-@router.post("/set-profile",status_code=status.HTTP_201_CREATED)
-async def create_user_profile_route(request:schemas.UserProfile,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
+
+@router.patch("/update",status_code=status.HTTP_200_OK)
+async def update_user_profile_route(request:schemas.UserUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == userr.id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-    response = UserCrud.create_user_profile(user=user,db=db,request=request)
+    response = UserCrud.update_user(id=user.id,db=db,request=request)
     return response
 
 
-@router.patch("/update-profile/",status_code=status.HTTP_200_OK)
-async def update_user_profile_route(request:schemas.UserProfileUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == userr.id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-    response = UserCrud.update_user_profile(user=user,db=db,request=request)
-    return response
-
-
-# @router.patch("/update",status_code=status.HTTP_200_OK)
-# async def update_user_profile_route(request:schemas.UserUpdate,userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
-#     user = db.query(models.User).filter(models.User.id == userr.id).first()
-#     if not user:
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-#     response = UserCrud.update_user(id=user.id,db=db,request=request)
-#     return response
-
-
-@router.get("/get-profile",status_code=status.HTTP_200_OK)
+@router.get("/get-profile",status_code=status.HTTP_200_OK,tags=['profile'],response_model=schemas.ShowUser)
 async def get_user_profile(userr:dict = Depends(get_current_user),db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == userr.id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,details="user not found")
-    response = {
-        "user":{
-        "username":user.username,
-        "email":user.email
-        },
-        "profile":user.profile
 
-    }
-    return response
+    return user
+
+
+
+
+
+@router.post("/google/",summary='google authentication')
+def google(response:Response,user:dict=Depends(get_google_auth), Authorize:AuthJWT=Depends()):
+    '''
+    expects a token from auth process
+    '''
+    access_token=Authorize.create_access_token(subject=user.email, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
+    refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
+    response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
+    response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
+    return {'access_token':access_token, 'refresh_token':refresh_token}
+
+
 
