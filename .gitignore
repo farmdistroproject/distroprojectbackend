@@ -168,3 +168,5 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+templates/signin.html
+.blob.db
