@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String,Boolean,DateTime,Date
+from sqlalchemy import Column, Integer, String,Boolean,DateTime,Date,BigInteger
 from config.database import Base
 import uuid
 from datetime import datetime
@@ -9,13 +9,14 @@ from sqlalchemy.dialects.postgresql import UUID
 
 class User(Base):
     __tablename__ = "user"
-    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True) #string to make it unique
+    pkid = Column(Integer,primary_key=True)
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4,unique=True) 
     email = Column(String(255),unique=True)
     password = Column(String)
 
     first_name = Column(String(255))
     last_name = Column(String(255))
-    phone_number= Column(Integer)
+    phone_number= Column(BigInteger)
     date_of_birth = Column(Date())
     date_registered = Column(DateTime, default=datetime.utcnow)
 
