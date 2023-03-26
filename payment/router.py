@@ -37,8 +37,10 @@ async def check_event_status(request:Request, response:Response, db:Session=Depe
     if json_output['event'] == "charge.success":
         current_payer = db.query(models.User).filter(models.User.email == json_output['data']['customer']['email']).first()
         print(current_payer.email)
-        current_payer.wallet_balance = json_output['data']['amount'] / 100
+        new_balance = json_output['data']['amount'] / 100
+        current_payer.wallet_balance += new_balance
         db.commit()
         print({"email":current_payer.email,"wallet_balance":current_payer.wallet_balance})       
-
+    else:
+        print(json_output['event'],current_payer.email)
         
