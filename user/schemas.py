@@ -27,6 +27,7 @@ class ShowUser(BaseModel):
     email: EmailStr
     first_name: str
     last_name:str
+    wallet_balance: Optional[int]
     phone_number: str
     date_of_birth: date
 

@@ -14,7 +14,7 @@ class User(Base):
     id = Column(UUID(as_uuid=True), default=uuid.uuid4,unique=True) 
     email = Column(String(255),unique=True)
     password = Column(String)
-
+    wallet_balance = Column(Integer,default=0, nullable=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
     phone_number= Column(BigInteger)
