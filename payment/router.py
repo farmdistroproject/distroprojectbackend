@@ -1,11 +1,11 @@
 import httpx 
 import os, hmac, hashlib, json
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Request
 from user.helpers import get_current_user
 from sqlalchemy.orm import Session
 from user import models
 from config.database import get_db
-from logging import Logger
+
 
 router = APIRouter()
 
@@ -18,12 +18,12 @@ async def Initialize_Payment(amount:int, user:dict= Depends(get_current_user)):
     converted_amount = amount*100
     body = {'email': user.email, 'amount':converted_amount}
     with httpx.Client() as client:
-        r = client.post(URL, headers=headers, data=body)
-        return r.json()
+        output = client.post(URL, headers=headers, data=body)
+        return output.json()
         
 
 @router.post("/webhook-verify")
-async def check_event_status(request:Request, response:Response, db:Session=Depends(get_db)):
+async def check_event_status(request:Request, db:Session=Depends(get_db)):
     """Webhook Verification to update user wallet_balance"""
     key = os.getenv("WEBHOOK_SECRET_KEY")
     output = await request.body()
