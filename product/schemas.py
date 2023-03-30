@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from uuid import UUID
 
 class PlansBase(BaseModel):
     name : str
@@ -11,9 +11,13 @@ class PlansBase(BaseModel):
 
 
 class PlansListView(BaseModel):
-    id : str
+    id : UUID
+    pkid : int
     name : str
     description :str
     duration : int
     price : int
     create_at : str
+
+    class Config():
+        orm_mode = True

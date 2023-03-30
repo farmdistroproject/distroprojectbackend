@@ -20,3 +20,7 @@ def create_plans(database_session: Session, request: PlansBase):
 def get_all_plans(database: Session):
 
     return database.query(Plans).all()
+
+def get_a_plan(id: int, database: Session):
+
+    return database.query(Plans).filter(Plans.pkid == id).first()
