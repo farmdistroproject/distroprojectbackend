@@ -52,4 +52,9 @@ async def check_event_status(request:Request, db:Session=Depends(get_db)):
         print({"email":current_payer.email,"wallet_balance":current_payer.wallet_balance})       
     else:
         print(json_output['event'],current_payer.email)
-        
+
+
+@router.get("/user-transactions")    
+async def get_user_transaction(user:dict=Depends(get_current_user),db:Session=Depends(get_db)):  
+    transaction = db.query(Transaction).filter(Transaction.user==user.id).all()
+    return transaction
