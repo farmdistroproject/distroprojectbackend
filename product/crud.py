@@ -3,7 +3,7 @@ from .schemas import PlansBase
 from sqlalchemy.orm.session import Session
 
 
-def create_plans(database_session: Session, request: PlansBase):
+def create_plans(db: Session, request: PlansBase):
 
     new_plan = Plans(
         name = request.name,
@@ -11,9 +11,9 @@ def create_plans(database_session: Session, request: PlansBase):
         duration = request.duration,
         price  = request.price
     )
-    database_session.add(new_plan)
-    database_session.commit()
-    database_session.refresh(new_plan)
+    db.add(new_plan)
+    db.commit()
+    db.refresh(new_plan)
 
     return new_plan
 
@@ -25,8 +25,8 @@ def get_a_plan(id: int, database: Session):
 
     return database.query(Plans).filter(Plans.pkid == id).first()
 
-def delete_a_plan(id: int, database: Session):
-    plan = database.query(Plans).filter(Plans.pkid == id).first()
-    database.delete(plan)
-    database.commit()
+def delete_a_plan(id: int, db: Session):
+    plan = db.query(Plans).filter(Plans.pkid == id).first()
+    db.delete(plan)
+    db.commit()
     return "Deleted Successfully"

@@ -6,7 +6,7 @@ from config.database import get_db
 
 
 router = APIRouter(
-    prefix="/plans",
+    prefix="/api/v1/plans",
     tags= ["plans"]
 )
 

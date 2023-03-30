@@ -12,7 +12,6 @@ class PlansBase(BaseModel):
 
 class PlansListView(BaseModel):
     id : UUID
-    pkid : int
     name : str
     description :str
     duration : int
