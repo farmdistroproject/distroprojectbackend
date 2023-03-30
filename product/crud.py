@@ -24,3 +24,9 @@ def get_all_plans(database: Session):
 def get_a_plan(id: int, database: Session):
 
     return database.query(Plans).filter(Plans.pkid == id).first()
+
+def delete_a_plan(id: int, database: Session):
+    plan = database.query(Plans).filter(Plans.pkid == id).first()
+    database.delete(plan)
+    database.commit()
+    return "Deleted Successfully"

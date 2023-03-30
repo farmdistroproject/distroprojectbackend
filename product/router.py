@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm.session import Session
 from .schemas import PlansBase, PlansListView
-from .crud import create_plans, get_all_plans, get_a_plan
+from .crud import create_plans, get_all_plans, get_a_plan, delete_a_plan
 from config.database import get_db
 
 
@@ -21,3 +21,7 @@ def create_plan(database: Session = Depends(get_db)):
 @router.get("/{id}/plans", response_model = PlansListView)
 def create_plan(id: int, database: Session = Depends(get_db)):
     return get_a_plan(id, database)
+
+@router.delete("/delete/{id}")
+def delete_plan(id: int, database: Session = Depends(get_db)):
+    return delete_a_plan(id, database)
