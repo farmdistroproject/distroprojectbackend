@@ -2,6 +2,7 @@ from pydantic import BaseModel,EmailStr
 from datetime import datetime,date,time
 from typing import Union,Optional
 from fastapi_jwt_auth import AuthJWT
+from payment.schemas import Transaction
 
 
 class User(BaseModel):
@@ -30,7 +31,8 @@ class ShowUser(BaseModel):
     wallet_balance: Optional[int]
     phone_number: str
     date_of_birth: date
-
+    transactions: list[Transaction]=[]
+    
     class Config():
         orm_mode = True
 
