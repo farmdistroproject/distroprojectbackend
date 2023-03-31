@@ -20,3 +20,10 @@ class PlansListView(BaseModel):
 
     class Config():
         orm_mode = True
+
+
+class PlanUpdateSchema(BaseModel):
+    name : str
+    description :str
+    duration : int
+    price : int
