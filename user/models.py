@@ -3,7 +3,7 @@ from config.database import Base
 import uuid
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
-
+from sqlalchemy.orm import relationship
 
 
 
@@ -23,8 +23,6 @@ class User(Base):
 
     email_verified=Column(Boolean, default=False)
     google_id = Column(String)
-
-
 
 
 
