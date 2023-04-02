@@ -16,7 +16,11 @@
 <li>Cart<li>
 
 <h4>Payment Profile</h4>
-
+</ul>
 ## db instructions
 <h4>head over to .env.example and fill the details, copy to a .env file </h4>
 <h4>that is how your env is to look</h4>
+
+# New Instructions
+<h4>run 'alembic merge heads' first before you run all other alembic shit 
+</h4>

@@ -1,12 +1,21 @@
-from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File,Body
-from datetime import timedelta,timezone,datetime,date
+from fastapi import (
+    status,
+    HTTPException,
+    Cookie,
+    Header,
+    Depends,
+    UploadFile,
+    File,
+    Body,
+)
+from datetime import timedelta, timezone, datetime, date
 
-from jose import JWTError,jwt
+from jose import JWTError, jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from passlib.context import CryptContext
 from .crud import UserCrud
-from . import  models
+from . import models
 
 from sqlalchemy.orm import Session
 import secrets
@@ -16,14 +25,14 @@ from config.database import get_db
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-pwd_context = CryptContext(schemes=['bcrypt'],deprecated="auto")
-
-SECRET_KEY='secret'
-ALGORITHM='HS256'
+SECRET_KEY = "secret"
+ALGORITHM = "HS256"
 
 
 def hash_password(password):
@@ -31,24 +40,31 @@ def hash_password(password):
     return hashed_password
 
 
-def verify_password(plain_password,hashed_password):
-    return pwd_context.verify(plain_password,hashed_password)
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-
-def get_user_by_email(email,db:Session,model):
+def get_user_by_email(email, db: Session, model):
     user = db.query(model).filter(model.email == email).first()
     return user
 
 
-def get_user_by_id(id:int,db:Session):
+def get_user_by_id(id: int, db: Session):
     user = db.query(models.User).filter(models.User.id == id).first()
     return user
-   
 
 
-def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), access_token:str=Cookie(default=None),Bearer=Header(default=None)):
-    exception=HTTPException(status_code=401, detail='invalid access token or access token has expired', headers={'WWW-Authenticate': 'Bearer'})
+def get_current_user(
+    Authorize: AuthJWT = Depends(),
+    db: Session = Depends(get_db),
+    access_token: str = Cookie(default=None),
+    Bearer=Header(default=None),
+):
+    exception = HTTPException(
+        status_code=401,
+        detail="invalid access token or access token has expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
     """
         this function uses python fastapi_jwt and its login route is api/v1/login/v2
@@ -56,9 +72,9 @@ def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), ac
 
     try:
         Authorize.jwt_required()
-        user_email=Authorize.get_jwt_subject()
+        user_email = Authorize.get_jwt_subject()
 
-        user=get_user_by_email(user_email,db,model=models.User)
+        user = get_user_by_email(user_email, db, model=models.User)
 
         return user
     except:
@@ -70,57 +86,67 @@ def generate_uuid(name):
     return name
 
 
-
-
-
 def check_birth_age(birthdate):
     today = date.today()
-    #checks if the user has already celebrated their birthday this year or not
-    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
-    return age >= 18 
-
-
-
+    # checks if the user has already celebrated their birthday this year or not
+    age = (
+        today.year
+        - birthdate.year
+        - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    )
+    return age >= 18
 
 
 def verification_code(email):
-    data={'sub':email, 'type':'verify_email_code', 'exp':datetime.now(tz=timezone.utc)+timedelta(minutes=15)}
-    encoded=jwt.encode(data,SECRET_KEY, algorithm=ALGORITHM)
+    data = {
+        "sub": email,
+        "type": "verify_email_code",
+        "exp": datetime.now(tz=timezone.utc) + timedelta(minutes=15),
+    }
+    encoded = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     return encoded
 
 
-def verification_email(token, db:Session,model):
-    exception= HTTPException(status_code=400,  detail='invalid token or token has expired')
-    userexception= HTTPException(status_code=400,  detail='no user')
+def verification_email(token, db: Session, model):
+    exception = HTTPException(
+        status_code=400, detail="invalid token or token has expired"
+    )
+    userexception = HTTPException(status_code=400, detail="no user")
     try:
-        payload = jwt.decode(token,'secret',algorithms='HS256')
-        user = db.query(model).filter(model.email == payload.get('sub')).first()
-        if payload.get('type') != 'verify_email_code':
+        payload = jwt.decode(token, "secret", algorithms="HS256")
+        user = db.query(model).filter(model.email == payload.get("sub")).first()
+        if payload.get("type") != "verify_email_code":
             raise exception
         elif not user:
-            raise userexception 
+            raise userexception
         user.email_verified = True
         db.commit()
-        return {"payload":payload,"user":user}
+        return {"payload": payload, "user": user}
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY,detail=e)
-    
-  
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=e)
 
 
-def get_google_auth(token:str, db:Session=Depends(get_db)):
+def get_google_auth(token: str, db: Session = Depends(get_db)):
     try:
-        
-        token= id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
-        user=get_user_by_email(email=token['email'],db=db,model=models.User)
+
+        token = id_token.verify_oauth2_token(
+            token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID")
+        )
+        user = get_user_by_email(email=token["email"], db=db, model=models.User)
         if user:
             return user
         else:
-            user=models.User(email=token['email'], email_verified=True,google_id=token['sub'], password=hash_password(token['sub']),first_name=token['family_name'], last_name=token['given_name'])
+            user = models.User(
+                email=token["email"],
+                email_verified=True,
+                google_id=token["sub"],
+                password=hash_password(token["sub"]),
+                first_name=token["family_name"],
+                last_name=token["given_name"],
+            )
             db.add(user)
             db.commit()
             db.refresh(user)
             return user
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f'{e}')
-
+        raise HTTPException(status_code=400, detail=f"{e}")

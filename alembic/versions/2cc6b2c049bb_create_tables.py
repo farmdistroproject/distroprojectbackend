@@ -29,23 +29,23 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('pkid'),
     sa.UniqueConstraint('id')
     )
-    op.create_table('user',
-    sa.Column('pkid', sa.Integer(), nullable=False),
-    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('email', sa.String(length=255), nullable=True),
-    sa.Column('password', sa.String(), nullable=True),
-    sa.Column('wallet_balance', sa.Integer(), nullable=True),
-    sa.Column('first_name', sa.String(length=255), nullable=True),
-    sa.Column('last_name', sa.String(length=255), nullable=True),
-    sa.Column('phone_number', sa.BigInteger(), nullable=True),
-    sa.Column('date_of_birth', sa.Date(), nullable=True),
-    sa.Column('date_registered', sa.DateTime(), nullable=True),
-    sa.Column('email_verified', sa.Boolean(), nullable=True),
-    sa.Column('google_id', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('pkid'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('id')
-    )
+    # op.create_table('user',
+    # sa.Column('pkid', sa.Integer(), nullable=False),
+    # sa.Column('id', postgresql.UUID(as_uuid=True), nullable=True),
+    # sa.Column('email', sa.String(length=255), nullable=True),
+    # sa.Column('password', sa.String(), nullable=True),
+    # sa.Column('wallet_balance', sa.Integer(), nullable=True),
+    # sa.Column('first_name', sa.String(length=255), nullable=True),
+    # sa.Column('last_name', sa.String(length=255), nullable=True),
+    # sa.Column('phone_number', sa.BigInteger(), nullable=True),
+    # sa.Column('date_of_birth', sa.Date(), nullable=True),
+    # sa.Column('date_registered', sa.DateTime(), nullable=True),
+    # sa.Column('email_verified', sa.Boolean(), nullable=True),
+    # sa.Column('google_id', sa.String(), nullable=True),
+    # sa.PrimaryKeyConstraint('pkid'),
+    # sa.UniqueConstraint('email'),
+    # sa.UniqueConstraint('id')
+    # )
     # ### end Alembic commands ###
 
 
