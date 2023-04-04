@@ -2,7 +2,7 @@ from typing import Union
 from fastapi import FastAPI
 from user import router as user_router
 from payment import router as payment_router
-from product import router  as plans_router
+from plan import router  as plans_router
 from products import router  as products_router
 from cart import router as cart_router
 
