@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from config.database import Base
 from user.models import *
-from product.models import *
+from plan.models import *
 from products.models import *
 from cart.models import *
 from dotenv import load_dotenv
