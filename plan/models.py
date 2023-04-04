@@ -10,7 +10,7 @@ class Plans(Base):
 
     pkid = Column(Integer,primary_key=True)
     id = Column(UUID(as_uuid=True), default=uuid.uuid4,unique=True)
-    name = Column(String(10))
+    name = Column(String(150))
     description = Column(String)
     duration = Column(Integer)
     price = Column(Integer)
