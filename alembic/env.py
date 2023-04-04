@@ -6,10 +6,13 @@ from sqlalchemy import pool
 from config.database import Base
 from user.models import *
 from product.models import *
+from products.models import *
+from cart.models import *
 from dotenv import load_dotenv
 from alembic import context
 load_dotenv()
 import os
+from payment.models import *
 
 
 

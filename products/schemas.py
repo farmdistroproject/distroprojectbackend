@@ -1,20 +1,18 @@
 from pydantic import BaseModel
 from uuid import UUID
 
-class PlansBase(BaseModel):
+class ProductBase(BaseModel):
     name : str
     description :str
-    duration : int
     price : int
-    create_at : str
 
 
 
-class PlansListView(BaseModel):
+
+class ProductListView(BaseModel):
     id : UUID
     name : str
     description :str
-    duration : int
     price : int
     create_at : str
 
@@ -22,8 +20,7 @@ class PlansListView(BaseModel):
         orm_mode = True
 
 
-class PlanUpdateSchema(BaseModel):
+class ProductUpdateSchema(BaseModel):
     name : str
     description :str
-    duration : int
     price : int
