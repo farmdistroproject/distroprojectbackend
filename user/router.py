@@ -29,7 +29,8 @@ from fastapi_jwt_auth import AuthJWT
 from .crud import UserCrud
 
 from datetime import timedelta
-
+from plan.models import Plans
+from products.models import Products
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -252,3 +253,10 @@ def google(
         httponly=True,
     )
     return {"access_token": access_token, "refresh_token": refresh_token}
+
+@router.get("/search")
+def search_keywords(keyword:str, db:Session = Depends(get_db)):
+   product_query = db.query(Products).filter(Products.name.contains(keyword) | Products.description.contains(keyword)).all()
+   plan_query = db.query(Plans).filter(Plans.name.contains(keyword) | Plans.description.contains(keyword)).all()
+   return {"product": product_query, "plan": plan_query}
+    #    return status(404), f"{keyword} can't be found, Add our suggestions to serve you better"
