@@ -61,7 +61,7 @@ async def add_to_cart(
 
 @router.post("/checkout")
 async def checkout(
-    product_id: str,
+    checkout_id: str,
     user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -71,7 +71,7 @@ async def checkout(
         db.query(models.Cart)
         .filter(
             models.Cart.user == user.id,
-            models.Cart.id == product_id,
+            models.Cart.id == checkout_id,
             models.Cart.is_paid == False,
         )
         .order_by(models.Cart.created_at.desc())
