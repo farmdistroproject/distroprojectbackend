@@ -70,9 +70,14 @@ async def checkout(checkout_id: str,user: dict = Depends(get_current_user),db: S
     )
 
     total_price = checkout_obj.amount
-    pay = await Initialize_Payment(amount=total_price, user=user)
+    if user.wallet_balance < total_price:
+        return {"response":"Money not enough, Please add money", "status": False}
+    else:
+        user.wallet_balance -= total_price
+        checkout_obj.is_paid == True
+    db.commit()
 
-    return {"pay": pay, "cart": cart, "price": total_price}
+    return {"response":"Baller Checked Out!", "status": True, "user_wallet_balance": user.wallet_balance, "price": total_price}
 
 
 @router.get("/user/cart-items")
