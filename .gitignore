@@ -172,3 +172,4 @@ poetry.toml
 templates/signin.html
 blob.db
 alembic/versions
+/alembic/versions
