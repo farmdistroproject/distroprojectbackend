@@ -124,6 +124,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.vscode
 env/
 venv/
 ENV/
@@ -170,3 +171,4 @@ poetry.toml
 
 templates/signin.html
 blob.db
+alembic/versions
